@@ -53,23 +53,25 @@ def fill_data_for_tabulate(current_dir):
 
 
 def main(stdscr):
+ #constants for curses
     curses.cbreak()
     stdscr.keypad(True)
     curses.curs_set(0)
-    
+#constants for getting dir path    
     path = f"{os.getcwd()}"
     current_dir = f"{path}"
 
-    data = fill_data_for_tabulate(current_dir)
+    
+
     terminal_width = stdscr.getmaxyx()[1]
-    col_widths = [max(int(terminal_width * 0.4), 10), max(int(terminal_width * 0.25), 10), max(int(terminal_width * 0.25), 10)]
+    col_widths = [max(int(terminal_width * 0.50), 10), max(int(terminal_width * 0.20), 10), max(int(terminal_width * 0.20), 10)]
     headers = [
-                f"{os.getcwd():<{col_widths[0]}}",
+                f"{path:<{col_widths[0]}}",
                 f"{'Size':<{col_widths[1]}}",
                 f"{'Date of Creation':<{col_widths[2]}}"
             ]
-        
-        
+#filling the table o(n)
+    data = fill_data_for_tabulate(current_dir)            
     rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
     
     cursor_row = 3
@@ -81,9 +83,9 @@ def main(stdscr):
         data = fill_data_for_tabulate(current_dir)
         
         terminal_width = stdscr.getmaxyx()[1]
-        col_widths = [max(int(terminal_width * 0.4), 10), max(int(terminal_width * 0.25), 10), max(int(terminal_width * 0.25), 10)]
+        col_widths = [max(int(terminal_width * 0.50), 10), max(int(terminal_width * 0.20), 10), max(int(terminal_width * 0.20), 10)]
         headers = [
-                    f"{os.getcwd():<{col_widths[0]}}",
+                    f"{path:<{col_widths[0]}}",
                     f"{'Size':<{col_widths[1]}}",
                     f"{'Date of Creation':<{col_widths[2]}}"
                 ]
@@ -120,10 +122,9 @@ def main(stdscr):
                     path = os.path.join(current_dir, selected_entry.lstrip('/'))
 
                     data = fill_data_for_tabulate(path)
-                    terminal_width = stdscr.getmaxyx()[1]
-                    col_widths = [max(int(terminal_width * 0.4), 10), max(int(terminal_width * 0.25), 10), max(int(terminal_width * 0.25), 10)]
+                    col_widths = [max(int(terminal_width * 0.50), 10), max(int(terminal_width * 0.20), 10), max(int(terminal_width * 0.20), 10)]
                     headers = [
-                        f"{os.getcwd():<{col_widths[0]}}",
+                        f"{path:<{col_widths[0]}}",
                         f"{'Size':<{col_widths[1]}}",
                         f"{'Date of Creation':<{col_widths[2]}}"
                     ]
@@ -132,6 +133,8 @@ def main(stdscr):
                     
                 else:
                     os.system(f"xdg-open '{path}'")
+        else:
+            continue
     
     curses.endwin()
 
