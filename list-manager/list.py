@@ -59,7 +59,7 @@ def main(stdscr):
     current_dir = f"{path}"
 
     data = fill_data_for_tabulate(current_dir)
-    rows=tabulate(data, headers=["File Name", "Size", "Date of Creation"], tablefmt="grid").splitlines()
+    rows=tabulate(data, headers=["File Name", "Size", "Date of Creation"], tablefmt="heavy_grid").splitlines()
     
     cursor_row = 3
     
@@ -68,7 +68,7 @@ def main(stdscr):
         
         current_dir = f"{path}"
         data = fill_data_for_tabulate(current_dir)
-        rows=tabulate(data, headers=["File Name", "Size", "Date of Creation"], tablefmt="grid").splitlines()
+        rows=tabulate(data, headers=["File Name", "Size", "Date of Creation"], tablefmt="heavy_grid").splitlines()
 
         for i,row in enumerate(rows):
             if i==cursor_row:
@@ -97,7 +97,7 @@ def main(stdscr):
                     path = os.path.join(current_dir, selected_entry.lstrip('/'))
 
                     data = fill_data_for_tabulate(path)
-                    rows = tabulate(data, headers=["File Name", "Size", "Date of Creation"], tablefmt="grid").splitlines()
+                    rows = tabulate(data, headers=["File Name", "Size", "Date of Creation"], tablefmt="heavy_grid").splitlines()
 
                     cursor_row = 3
                 else:
