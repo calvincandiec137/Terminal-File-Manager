@@ -64,7 +64,7 @@ def main(stdscr):
     terminal_width = stdscr.getmaxyx()[1]
     col_widths = [max(int(terminal_width * 0.4), 10), max(int(terminal_width * 0.25), 10), max(int(terminal_width * 0.25), 10)]
     headers = [
-                f"{'File Name':<{col_widths[0]}}",
+                f"{os.getcwd():<{col_widths[0]}}",
                 f"{'Size':<{col_widths[1]}}",
                 f"{'Date of Creation':<{col_widths[2]}}"
             ]
@@ -83,7 +83,7 @@ def main(stdscr):
         terminal_width = stdscr.getmaxyx()[1]
         col_widths = [max(int(terminal_width * 0.4), 10), max(int(terminal_width * 0.25), 10), max(int(terminal_width * 0.25), 10)]
         headers = [
-                    f"{'File Name':<{col_widths[0]}}",
+                    f"{os.getcwd():<{col_widths[0]}}",
                     f"{'Size':<{col_widths[1]}}",
                     f"{'Date of Creation':<{col_widths[2]}}"
                 ]
@@ -123,7 +123,7 @@ def main(stdscr):
                     terminal_width = stdscr.getmaxyx()[1]
                     col_widths = [max(int(terminal_width * 0.4), 10), max(int(terminal_width * 0.25), 10), max(int(terminal_width * 0.25), 10)]
                     headers = [
-                        f"{'File Name':<{col_widths[0]}}",
+                        f"{os.getcwd():<{col_widths[0]}}",
                         f"{'Size':<{col_widths[1]}}",
                         f"{'Date of Creation':<{col_widths[2]}}"
                     ]
