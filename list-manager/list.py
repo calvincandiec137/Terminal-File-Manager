@@ -64,10 +64,10 @@ def main(stdscr):
     terminal_width = stdscr.getmaxyx()[1]
     col_widths = [max(int(terminal_width * 0.4), 10), max(int(terminal_width * 0.25), 10), max(int(terminal_width * 0.25), 10)]
     headers = [
-                    f"{'File Name':<{col_widths[0]}}",
-                    f"{'Size':<{col_widths[1]}}",
-                    f"{'Date of Creation':<{col_widths[2]}}"
-                ]
+                f"{'File Name':<{col_widths[0]}}",
+                f"{'Size':<{col_widths[1]}}",
+                f"{'Date of Creation':<{col_widths[2]}}"
+            ]
         
         
     rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
@@ -91,12 +91,14 @@ def main(stdscr):
         
         rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
 
-        for i,row in enumerate(rows):
-            if i==cursor_row:
-                stdscr.addstr(f"{row}",curses.A_REVERSE)
+        for i, row in enumerate(rows):
+            # Truncate the row to fit the terminal width
+            truncated_row = row[:terminal_width - 1]
+            if i == cursor_row:
+                stdscr.addstr(f"{truncated_row}\n", curses.A_REVERSE)
             else:
-                stdscr.addstr(f"{row}")
-            stdscr.addstr("\n")
+                stdscr.addstr(f"{truncated_row}\n")
+
         
         stdscr.refresh()
         key = stdscr.getch()
@@ -125,17 +127,11 @@ def main(stdscr):
                         f"{'Size':<{col_widths[1]}}",
                         f"{'Date of Creation':<{col_widths[2]}}"
                     ]
-        
-        
                     rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
-
                     cursor_row = 3
+                    
                 else:
                     os.system(f"xdg-open '{path}'")
-
-        
-        stdscr.addstr(0, 0, f"Key pressed: {key}  ")
-
     
     curses.endwin()
 
