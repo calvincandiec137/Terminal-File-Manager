@@ -51,17 +51,18 @@ def fill_data_for_tabulate(current_dir):
             data.append([fileName, sizeName, fileDate])
     return data
 
-
 def main(stdscr):
- #constants for curses
+    # Enable colors
+    curses.start_color()
+    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Green table lines
+    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLUE)  # Blue reverse text
+
     curses.cbreak()
     stdscr.keypad(True)
     curses.curs_set(0)
-#constants for getting dir path    
+    
     path = f"{os.getcwd()}"
     current_dir = f"{path}"
-
-    
 
     terminal_width = stdscr.getmaxyx()[1]
     col_widths = [max(int(terminal_width * 0.50), 10), max(int(terminal_width * 0.20), 10), max(int(terminal_width * 0.20), 10)]
@@ -70,12 +71,10 @@ def main(stdscr):
                 f"{'Size':<{col_widths[1]}}",
                 f"{'Date of Creation':<{col_widths[2]}}"
             ]
-#filling the table o(n)
-    data = fill_data_for_tabulate(current_dir)            
+    data = fill_data_for_tabulate(current_dir)
     rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
-    
     cursor_row = 3
-    
+
     while True:
         stdscr.clear()
         
@@ -90,29 +89,27 @@ def main(stdscr):
                     f"{'Date of Creation':<{col_widths[2]}}"
                 ]
         
-        
         rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
 
         for i, row in enumerate(rows):
             # Truncate the row to fit the terminal width
             truncated_row = row[:terminal_width - 1]
             if i == cursor_row:
-                stdscr.addstr(f"{truncated_row}\n", curses.A_REVERSE)
+                stdscr.addstr(f"{truncated_row}\n", curses.color_pair(2) | curses.A_REVERSE)
             else:
-                stdscr.addstr(f"{truncated_row}\n")
+                stdscr.addstr(f"{truncated_row}\n", curses.color_pair(1))
 
-        
         stdscr.refresh()
         key = stdscr.getch()
-        
+
         if key == curses.KEY_UP and cursor_row > 3:
             cursor_row -= 2
         elif key == curses.KEY_DOWN and cursor_row < len(rows) - 2:
             cursor_row += 2
         elif key == ord('q'):
             break
-        elif key==curses.KEY_LEFT:
-            path=os.path.dirname(current_dir)
+        elif key == curses.KEY_LEFT:
+            path = os.path.dirname(current_dir)
         elif key == 10:  
             data_index = (cursor_row - 3) // 2  
             if 0 <= data_index < len(data):  
@@ -120,7 +117,6 @@ def main(stdscr):
 
                 if selected_entry.startswith("/"):
                     path = os.path.join(current_dir, selected_entry.lstrip('/'))
-
                     data = fill_data_for_tabulate(path)
                     col_widths = [max(int(terminal_width * 0.50), 10), max(int(terminal_width * 0.20), 10), max(int(terminal_width * 0.20), 10)]
                     headers = [
@@ -130,15 +126,12 @@ def main(stdscr):
                     ]
                     rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
                     cursor_row = 3
-                    
                 else:
                     os.system(f"xdg-open '{path}'")
         else:
             continue
     
     curses.endwin()
-
-        
 
 if  __name__ == "__main__":
     curses.wrapper(main)
