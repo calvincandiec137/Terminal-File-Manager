@@ -72,7 +72,7 @@ def main(stdscr):
                 f"{'Date of Creation':<{col_widths[2]}}"
             ]
     data = fill_data_for_tabulate(current_dir)
-    rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
+    rows = tabulate(data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
     cursor_row = 3
 
     while True:
@@ -89,7 +89,7 @@ def main(stdscr):
                     f"{'Date of Creation':<{col_widths[2]}}"
                 ]
         
-        rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
+        rows = tabulate(data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
 
         for i, row in enumerate(rows):
             # Truncate the row to fit the terminal width
@@ -124,7 +124,7 @@ def main(stdscr):
                         f"{'Size':<{col_widths[1]}}",
                         f"{'Date of Creation':<{col_widths[2]}}"
                     ]
-                    rows = tabulate(data, headers=headers, tablefmt="heavy_grid", maxcolwidths=[None, 18]).splitlines()
+                    rows = tabulate(data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
                     cursor_row = 3
                 else:
                     os.system(f"xdg-open '{path}'")
