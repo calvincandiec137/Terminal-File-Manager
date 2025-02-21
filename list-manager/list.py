@@ -2,136 +2,109 @@
 
 import os
 import time
-from tabulate import tabulate
 import curses
+from tabulate import tabulate
 
 tabulate.PRESERVE_WHITESPACE = True
 
+COLOR_TABLE = 1
+COLOR_HIGHLIGHT = 2
+
 def format_size(size_in_bytes):
+
     for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
         if size_in_bytes < 1024:
             return f"{size_in_bytes:.2f} {unit}"
         size_in_bytes /= 1024
 
+def get_folder_size(path):
 
-def sizeofFolder(path):
-    folderSize = 0
-    listItems = os.listdir(path)
-    for j in listItems:
-        itemPath = os.path.join(path, j)
-        if os.path.islink(itemPath):
+    folder_size = 0
+    for entry in os.listdir(path):
+        entry_path = os.path.join(path, entry)
+        if os.path.islink(entry_path):
             continue
-        if os.path.isfile(itemPath):
-            folderSize += os.path.getsize(itemPath)
+        if os.path.isfile(entry_path):
+            folder_size += os.path.getsize(entry_path)
         else:
-            folderSize += sizeofFolder(itemPath)
-    return folderSize
+            folder_size += get_folder_size(entry_path)
+    return folder_size
 
-def fill_data_for_tabulate(current_dir):
-    dirs = os.listdir(current_dir)
-    
+def gather_directory_data(directory):
+
     data = []
-#hello;
-    for i in dirs:
-        if i.startswith('.'):
+    for entry in os.listdir(directory):
+        if entry.startswith('.'):
             continue
-        path = os.path.join(current_dir, i)
-    
-        if os.path.isfile(path):
-            fileName = os.path.basename(path)
-            fileSize = os.path.getsize(path)
-            sizeName = format_size(fileSize)
-            fileDate = time.ctime(os.path.getmtime(path))
-            data.append([fileName, sizeName, fileDate])
-        else:  
-            fileName = f"/{os.path.basename(path)}"
-            folderSize = sizeofFolder(path)
-            sizeName = format_size(folderSize)
-            fileDate = time.ctime(os.path.getmtime(path))
-            data.append([fileName, sizeName, fileDate])
+        entry_path = os.path.join(directory, entry)
+        entry_name = f"/{entry}" if os.path.isdir(entry_path) else entry
+        entry_size = get_folder_size(entry_path) if os.path.isdir(entry_path) else os.path.getsize(entry_path)
+        entry_date = time.ctime(os.path.getmtime(entry_path))
+        data.append([entry_name, format_size(entry_size), entry_date])
     return data
 
-def main(stdscr):
-    # Enable colors
-    curses.start_color()
-    curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Green table lines
-    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_BLUE)  # Blue reverse text
+def generate_headers(directory, terminal_width):
 
+    col_widths = [max(int(terminal_width * 0.50), 10),
+                  max(int(terminal_width * 0.20), 10),
+                  max(int(terminal_width * 0.20), 10)]
+    return [
+        f"{directory:<{col_widths[0]}}",
+        f"{'Size':<{col_widths[1]}}",
+        f"{'Date of Creation':<{col_widths[2]}}"
+    ]
+
+def handle_key_input(key, cursor_row, directory, data):
+
+    if key == curses.KEY_UP and cursor_row > 3:
+        return cursor_row - 2, directory
+    elif key == curses.KEY_DOWN and cursor_row < len(data) - 2:
+        return cursor_row + 2, directory
+    elif key == ord('q'):
+        exit()
+    elif key == curses.KEY_LEFT:
+        return 3, os.path.dirname(directory)
+    elif key == 10:  # Enter key
+        data_index = (cursor_row - 3) // 2
+        if 0 <= data_index < len(data):
+            selected_entry = data[data_index][0]
+            if selected_entry.startswith("/"):
+                return 3, os.path.join(directory, selected_entry.lstrip('/'))
+            else:
+                os.system(f"xdg-open '{directory}'")
+    return cursor_row, directory
+
+def main(stdscr):
+
+    curses.start_color()
+    curses.init_pair(COLOR_TABLE, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(COLOR_HIGHLIGHT, curses.COLOR_WHITE, curses.COLOR_BLUE)
     curses.cbreak()
     stdscr.keypad(True)
     curses.curs_set(0)
-    
-    path = f"{os.getcwd()}"
-    current_dir = f"{path}"
 
-    terminal_width = stdscr.getmaxyx()[1]
-    col_widths = [max(int(terminal_width * 0.50), 10), max(int(terminal_width * 0.20), 10), max(int(terminal_width * 0.20), 10)]
-    headers = [
-                f"{path:<{col_widths[0]}}",
-                f"{'Size':<{col_widths[1]}}",
-                f"{'Date of Creation':<{col_widths[2]}}"
-            ]
-    data = fill_data_for_tabulate(current_dir)
-    rows = tabulate(data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
+    current_path = os.getcwd()
     cursor_row = 3
 
     while True:
         stdscr.clear()
-        
-        current_dir = f"{path}"
-        data = fill_data_for_tabulate(current_dir)
-        
         terminal_width = stdscr.getmaxyx()[1]
-        col_widths = [max(int(terminal_width * 0.50), 10), max(int(terminal_width * 0.20), 10), max(int(terminal_width * 0.20), 10)]
-        headers = [
-                    f"{path:<{col_widths[0]}}",
-                    f"{'Size':<{col_widths[1]}}",
-                    f"{'Date of Creation':<{col_widths[2]}}"
-                ]
-        
-        rows = tabulate(data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
+        directory_data = gather_directory_data(current_path)
+        headers = generate_headers(current_path, terminal_width)
+        rows = tabulate(directory_data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
 
         for i, row in enumerate(rows):
-            # Truncate the row to fit the terminal width
             truncated_row = row[:terminal_width - 1]
             if i == cursor_row:
-                stdscr.addstr(f"{truncated_row}\n", curses.color_pair(2) | curses.A_REVERSE)
+                stdscr.addstr(f"{truncated_row}\n", curses.color_pair(COLOR_HIGHLIGHT) | curses.A_REVERSE)
             else:
-                stdscr.addstr(f"{truncated_row}\n", curses.color_pair(1))
-
+                stdscr.addstr(f"{truncated_row}\n", curses.color_pair(COLOR_TABLE))
+        
         stdscr.refresh()
         key = stdscr.getch()
-
-        if key == curses.KEY_UP and cursor_row > 3:
-            cursor_row -= 2
-        elif key == curses.KEY_DOWN and cursor_row < len(rows) - 2:
-            cursor_row += 2
-        elif key == ord('q'):
-            break
-        elif key == curses.KEY_LEFT:
-            path = os.path.dirname(current_dir)
-        elif key == 10:  
-            data_index = (cursor_row - 3) // 2  
-            if 0 <= data_index < len(data):  
-                selected_entry = data[data_index][0]
-
-                if selected_entry.startswith("/"):
-                    path = os.path.join(current_dir, selected_entry.lstrip('/'))
-                    data = fill_data_for_tabulate(path)
-                    col_widths = [max(int(terminal_width * 0.50), 10), max(int(terminal_width * 0.20), 10), max(int(terminal_width * 0.20), 10)]
-                    headers = [
-                        f"{path:<{col_widths[0]}}",
-                        f"{'Size':<{col_widths[1]}}",
-                        f"{'Date of Creation':<{col_widths[2]}}"
-                    ]
-                    rows = tabulate(data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
-                    cursor_row = 3
-                else:
-                    os.system(f"xdg-open '{path}'")
-        else:
-            continue
+        cursor_row, current_path = handle_key_input(key, cursor_row, current_path, directory_data)
     
     curses.endwin()
 
-if  __name__ == "__main__":
+if __name__ == "__main__":
     curses.wrapper(main)
