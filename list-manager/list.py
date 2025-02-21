@@ -5,6 +5,10 @@ import time
 import curses
 from tabulate import tabulate
 
+#Cache the directory size
+
+dir_cache={}
+
 tabulate.PRESERVE_WHITESPACE = True
 
 COLOR_TABLE = 1
@@ -18,17 +22,24 @@ def format_size(size_in_bytes):
         size_in_bytes /= 1024
 
 def get_folder_size(path):
+    if path in dir_cache:
+        return dir_cache[path]
 
-    folder_size = 0
-    for entry in os.listdir(path):
-        entry_path = os.path.join(path, entry)
-        if os.path.islink(entry_path):
-            continue
-        if os.path.isfile(entry_path):
-            folder_size += os.path.getsize(entry_path)
-        else:
-            folder_size += get_folder_size(entry_path)
-    return folder_size
+    total_size = 0
+    try:
+        with os.scandir(path) as entries:
+            for entry in entries:
+                if entry.is_symlink():
+                    continue
+                if entry.is_file(follow_symlinks=False):
+                    total_size += entry.stat(follow_symlinks=False).st_size
+                elif entry.is_dir(follow_symlinks=False):
+                    total_size += get_folder_size(entry.path)
+    except PermissionError:
+        pass 
+    dir_cache[path]=total_size
+    return total_size
+
 
 def gather_directory_data(directory):
 
@@ -55,27 +66,30 @@ def generate_headers(directory, terminal_width):
     ]
 
 def handle_key_input(key, cursor_row, directory, data):
+    max_cursor = 3 + (len(data) * 2)
 
     if key == curses.KEY_UP and cursor_row > 3:
-        return cursor_row - 2, directory
-    elif key == curses.KEY_DOWN and cursor_row < len(data) - 2:
-        return cursor_row + 2, directory
+        return cursor_row - 2, directory  # Move up
+    elif key == curses.KEY_DOWN and cursor_row < max_cursor - 2:
+        return cursor_row + 2, directory  # Move down
     elif key == ord('q'):
-        exit()
+        return None, None
     elif key == curses.KEY_LEFT:
-        return 3, os.path.dirname(directory)
+        return 3, os.path.dirname(directory)  # Move back
     elif key == 10:  # Enter key
         data_index = (cursor_row - 3) // 2
         if 0 <= data_index < len(data):
             selected_entry = data[data_index][0]
-            if selected_entry.startswith("/"):
-                return 3, os.path.join(directory, selected_entry.lstrip('/'))
+            selected_path = os.path.join(directory, selected_entry.lstrip('/'))
+
+            if os.path.isdir(selected_path):
+                return 3, selected_path  # Navigate into folder
             else:
-                os.system(f"xdg-open '{directory}'")
-    return cursor_row, directory
+                os.system(f"xdg-open '{selected_path}'")
+                return cursor_row, directory  # Stay in the same directory
+    return cursor_row, directory  # Default case (no change)
 
 def main(stdscr):
-
     curses.start_color()
     curses.init_pair(COLOR_TABLE, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(COLOR_HIGHLIGHT, curses.COLOR_WHITE, curses.COLOR_BLUE)
@@ -102,9 +116,15 @@ def main(stdscr):
         
         stdscr.refresh()
         key = stdscr.getch()
-        cursor_row, current_path = handle_key_input(key, cursor_row, current_path, directory_data)
-    
+        
+        new_cursor, new_path = handle_key_input(key, cursor_row, current_path, directory_data)
+        if new_cursor is None:
+            break 
+
+        cursor_row, current_path = new_cursor, new_path
+        
     curses.endwin()
+
 
 if __name__ == "__main__":
     curses.wrapper(main)
