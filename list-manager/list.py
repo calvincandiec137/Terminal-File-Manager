@@ -3,6 +3,7 @@
 import os
 import time
 import curses
+import shutil
 from tabulate import tabulate
 
 #Cache
@@ -92,6 +93,17 @@ def handle_key_input(key:int, cursor_row:int, directory:str, data:list, sort_def
         return cursor_row + 2, directory, sort_def  # Move down
     elif key == ord('q'):
         return None, None, None
+    elif key == curses.KEY_DC:
+        data_index = (cursor_row - 3) // 2
+        if 0 <= data_index < len(data):
+            selected_entry = data[data_index][0]
+            selected_path = os.path.join(directory, selected_entry.lstrip('/'))
+
+            if os.path.isdir(selected_path):
+                shutil.rmtree(selected_path ,ignore_errors = True)    
+            else:
+                os.remove(selected_path)        
+        return cursor_row , directory, sort_def
     elif key == ord('s'):
         return cursor_row, directory, 's'
     elif key == ord('a'):
