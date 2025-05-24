@@ -43,7 +43,14 @@ def get_folder_size(path):
 
 
 def gather_directory_data(directory, sort):
-    sort_key = 0 if sort is None else 1
+    
+    sort_key=0  
+    if sort == 's':
+        sort_key=1
+    elif sort == 'a':
+        sort_key=0
+    elif sort == 'm':
+        sort_key=2
     data = []
 
     for entry in os.listdir(directory):
@@ -53,9 +60,9 @@ def gather_directory_data(directory, sort):
         entry_path = os.path.join(directory, entry)
         entry_name = f"/{entry}" if os.path.isdir(entry_path) else entry
         entry_size = get_folder_size(entry_path) if os.path.isdir(entry_path) else os.path.getsize(entry_path)
-        entry_date = time.ctime(os.path.getmtime(entry_path))
+        modify_date = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(os.path.getmtime(entry_path)))
 
-        data.append([entry_name, entry_size, entry_date])  
+        data.append([entry_name, entry_size, modify_date])  
 
     data.sort(key=lambda x: x[sort_key])
 
@@ -87,6 +94,10 @@ def handle_key_input(key:int, cursor_row:int, directory:str, data:list, sort_def
         return None, None, None
     elif key == ord('s'):
         return cursor_row, directory, 's'
+    elif key == ord('a'):
+        return cursor_row, directory, 'a'
+    elif key == ord('m'):
+        return cursor_row, directory, 'm'
     elif key == curses.KEY_LEFT:
         return 3, os.path.dirname(directory), sort_def # Move back
     elif key == 10:  # Enter key
