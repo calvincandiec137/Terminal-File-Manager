@@ -5,7 +5,7 @@ import time
 import curses
 from tabulate import tabulate
 
-#Cache the directory size
+#Cache
 
 dir_cache={}
 
@@ -14,7 +14,7 @@ tabulate.PRESERVE_WHITESPACE = True
 COLOR_TABLE = 1
 COLOR_HIGHLIGHT = 2
 
-#To convert the the size from byte to KB, MB etc..
+# byte to KB, MB and GB
 def format_size(size_in_bytes):
 
     for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
@@ -76,19 +76,19 @@ def generate_headers(directory, terminal_width):
         f"{'Last date modified':<{col_widths[2]}}"
     ]
 
-def handle_key_input(key, cursor_row, directory, data):
+def handle_key_input(key:int, cursor_row:int, directory:str, data:list, sort_def:str) -> tuple[int, str, str]:
     max_cursor = 3 + (len(data) * 2)
 
     if key == curses.KEY_UP and cursor_row > 3:
-        return cursor_row - 2, directory,None  # Move up
+        return cursor_row - 2, directory, sort_def  # Move up
     elif key == curses.KEY_DOWN and cursor_row < max_cursor - 2:
-        return cursor_row + 2, directory, None  # Move down
+        return cursor_row + 2, directory, sort_def  # Move down
     elif key == ord('q'):
         return None, None, None
-    elif key== ord('s'):
-        return cursor_row, directory, "size"
+    elif key == ord('s'):
+        return cursor_row, directory, 's'
     elif key == curses.KEY_LEFT:
-        return 3, os.path.dirname(directory) ,None # Move back
+        return 3, os.path.dirname(directory), sort_def # Move back
     elif key == 10:  # Enter key
         data_index = (cursor_row - 3) // 2
         if 0 <= data_index < len(data):
@@ -96,11 +96,11 @@ def handle_key_input(key, cursor_row, directory, data):
             selected_path = os.path.join(directory, selected_entry.lstrip('/'))
 
             if os.path.isdir(selected_path):
-                return 3, selected_path  # Navigate into folder
+                return 3, selected_path, sort_def  # Navigate into folder
             else:
                 os.system(f"xdg-open '{selected_path}'")
-                return cursor_row, directory  # Stay in the same directory
-    return cursor_row, directory , None # Default case (no change)
+                return cursor_row, directory, sort_def  # Stay in the same directory
+    return cursor_row, directory, sort_def # Default case (no change)
 
 def main(stdscr):
     curses.start_color()
@@ -111,6 +111,7 @@ def main(stdscr):
     curses.curs_set(0)
 
     sort=None
+    sort_def=sort
     current_path = os.getcwd()
     cursor_row = 3
 
@@ -120,7 +121,7 @@ def main(stdscr):
         directory_data = gather_directory_data(current_path, sort)
         headers = generate_headers(current_path, terminal_width)
         rows = tabulate(directory_data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
-
+        
         for i, row in enumerate(rows):
             truncated_row = row[:terminal_width - 1]
             if i == cursor_row:
@@ -130,12 +131,14 @@ def main(stdscr):
         
         stdscr.refresh()
         key = stdscr.getch()
+        sort_struck=sort_def
         
-        new_cursor, new_path, sort_struck = handle_key_input(key, cursor_row, current_path, directory_data)
+        new_cursor, new_path, sort_struck= handle_key_input(key, cursor_row, current_path, directory_data, sort_def)
         if new_cursor is None:
             break 
 
         cursor_row, current_path, sort = new_cursor, new_path, sort_struck
+        sort_def=sort
         
     curses.endwin()
 
