@@ -2,9 +2,9 @@
 import curses
 import os
 import tabulate
-from lfm import file_utils as file
-from lfm import input_handler as input
-from lfm import config
+import file_utils as file
+import input_handler as input
+import config
 
 tabulate.PRESERVE_WHITESPACE = True
 
