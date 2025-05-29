@@ -2,9 +2,9 @@
 import curses
 import os
 import tabulate
-import file_utils as file
-import input_handler as input
-import config
+from lfm import file_utils as file
+from lfm import input_handler as input
+from lfm import config
 
 tabulate.PRESERVE_WHITESPACE = True
 
@@ -60,4 +60,5 @@ def main(stdscr):
 
 
 if __name__ == "__main__":
+    import curses
     curses.wrapper(main)
