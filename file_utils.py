@@ -32,13 +32,7 @@ def get_folder_size(path):
 
 def gather_directory_data(directory, sort):
     
-    sort_key=0  
-    if sort == 's':
-        sort_key=1
-    elif sort == 'a':
-        sort_key=0
-    elif sort == 'm':
-        sort_key=2
+    sort_key = {'a':0, 's':1, 'm': 2}
     data = []
 
     for entry in os.listdir(directory):
@@ -52,7 +46,7 @@ def gather_directory_data(directory, sort):
 
         data.append([entry_name, entry_size, modify_date])  
 
-    data.sort(key=lambda x: x[sort_key])
+    data.sort(key=lambda x: x[sort_key[sort]])
 
     for item in data:
         item[1] = format_size(item[1])  
