@@ -27,13 +27,18 @@ def main(stdscr):
     cursor_row = 3 
     scroll_offset = 0 
     
+    terminal_height, terminal_width = stdscr.getmaxyx()
+    
+    mid = terminal_width//2
+    left = stdscr.subwin(terminal_height, mid, 0, 0)
+    right = stdscr.subwin(terminal_height, terminal_width-mid, 0, mid-14)
+    
     while True:
     
         stdscr.clear()
-        terminal_height, terminal_width = stdscr.getmaxyx()
     
         directory_data = file.gather_directory_data(current_path, sort)
-        headers = file.generate_headers(current_path, terminal_width)
+        headers = file.generate_headers(current_path, mid-1)
         rows = tabulate.tabulate(directory_data, headers=headers, tablefmt="rounded_outline", maxcolwidths=[None, 18]).splitlines()
         
         max_displayable_rows = terminal_height - 2  # 2 for keybinds
@@ -58,9 +63,9 @@ def main(stdscr):
             try:
                 # Check if this is the cursor row (accounting for scroll)
                 if i == cursor_row:
-                    stdscr.addstr(display_row, 0, truncated_row, curses.color_pair(config.COLOR_HIGHLIGHT) | curses.A_REVERSE)
+                    left.addstr(display_row, 0, truncated_row, curses.color_pair(config.COLOR_HIGHLIGHT) | curses.A_REVERSE)
                 else:
-                    stdscr.addstr(display_row, 0, truncated_row, curses.color_pair(config.COLOR_TABLE))
+                    left.addstr(display_row, 0, truncated_row, curses.color_pair(config.COLOR_TABLE))
                 display_row += 1
             except curses.error:
                 break
@@ -73,7 +78,7 @@ def main(stdscr):
             status_line = "Delete=Remove, ↑↓=Navigate, Enter=Open, q=Quit, c=Copy, x=Cut, v=Paste"
         
         try:
-            stdscr.addstr(terminal_height - 1, 0, status_line[:terminal_width-1], curses.color_pair(3))
+            left.addstr(terminal_height - 1, 0, status_line[:terminal_width-1], curses.color_pair(3))
         except curses.error:
             pass
         

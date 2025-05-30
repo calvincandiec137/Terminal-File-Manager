@@ -41,26 +41,20 @@ def gather_directory_data(directory, sort):
         
         entry_path = os.path.join(directory, entry)
         entry_name = f"/{entry}" if os.path.isdir(entry_path) else entry
-        entry_size = get_folder_size(entry_path) if os.path.isdir(entry_path) else os.path.getsize(entry_path)
-        modify_date = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(os.path.getmtime(entry_path)))
+       # entry_size = get_folder_size(entry_path) if os.path.isdir(entry_path) else os.path.getsize(entry_path)
+       # modify_date = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(os.path.getmtime(entry_path)))
 
-        data.append([entry_name, entry_size, modify_date])  
+        data.append([entry_name])  
 
     data.sort(key=lambda x: x[sort_key[sort]])
 
-    for item in data:
-        item[1] = format_size(item[1])  
+   # for item in data:
+   #     item[1] = format_size(item[1])  
 
     return data
 
 
 def generate_headers(directory, terminal_width):
 
-    col_widths = [max(int(terminal_width * 0.50), 10),
-                  max(int(terminal_width * 0.20), 10),
-                  max(int(terminal_width * 0.20), 10)]
     return [
-        f"{directory:<{col_widths[0]}}",
-        f"{'Size':<{col_widths[1]}}",
-        f"{'Last date modified':<{col_widths[2]}}"
-    ]
+        f"{directory:<{terminal_width-10}}"]
