@@ -30,21 +30,25 @@ def get_folder_size(path):
     return total_size
 
 
-def gather_directory_data(directory, sort):
+def gather_directory_data(directory, sort, terminal_height):
     
     sort_key = {'a':0, 's':1, 'm': 2}
     data = []
 
+    for i in range(terminal_height-len(os.listdir(directory))-10):
+        data.append(["~"])
+
     for entry in os.listdir(directory):
-        if entry.startswith('.'):
-            continue
+        #if entry.startswith('.'):
+         #   continue
         
         entry_path = os.path.join(directory, entry)
         entry_name = f"/{entry}" if os.path.isdir(entry_path) else entry
        # entry_size = get_folder_size(entry_path) if os.path.isdir(entry_path) else os.path.getsize(entry_path)
        # modify_date = time.strftime("%d/%m/%Y %H:%M:%S", time.localtime(os.path.getmtime(entry_path)))
 
-        data.append([entry_name])  
+        data.append([entry_name])
+    
 
     data.sort(key=lambda x: x[sort_key[sort]])
 

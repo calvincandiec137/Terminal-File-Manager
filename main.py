@@ -37,7 +37,7 @@ def main(stdscr):
     
         stdscr.clear()
     
-        directory_data = file.gather_directory_data(current_path, sort)
+        directory_data = file.gather_directory_data(current_path, sort, terminal_height)
         headers = file.generate_headers(current_path, mid-1)
         rows = tabulate.tabulate(directory_data, headers=headers, tablefmt="rounded_outline", maxcolwidths=[None, 18]).splitlines()
         
@@ -54,7 +54,7 @@ def main(stdscr):
         # Display the visible portion of the table
         display_row = 0
         for i in range(start_row, end_row):
-            if display_row >= max_displayable_rows - 1:  # Leave space for status
+            if display_row >= max_displayable_rows:  # Leave space for status
                 break
                 
             row = rows[i]
