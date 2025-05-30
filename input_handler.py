@@ -145,7 +145,7 @@ def handle_key_input(key: int, cursor_row: int, directory: str, data: list, sort
                     pass  
                 return cursor_row, directory, sort_def 
    
-    return cursor_row, directory, sort_def  # Default case (no change)
+    return cursor_row, directory, sort_def 
 
 def get_data_index_from_cursor(cursor_row: int, data: list) -> int:
 
