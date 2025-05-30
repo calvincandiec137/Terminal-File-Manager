@@ -68,8 +68,7 @@ def main(stdscr):
         # Display status line with scroll information
         if total_rows > max_displayable_rows:
             scroll_info = f"[{scroll_offset + 1}-{min(scroll_offset + max_displayable_rows, total_rows)}/{total_rows}]"
-           # status_line = f"Delete=Remove, ↑↓=Navigate, Enter=Open, q=Quit, c=Copy, x=Cut, v=Paste, {scroll_info}"
-            status_line = f"start_row:{start_row} end_row:{end_row} max_displayable_rows:{max_displayable_rows} max_scroll:1{max_scroll} {scroll_offset}"
+            status_line = f"Delete=Remove, ↑↓=Navigate, Enter=Open, q=Quit, c=Copy, x=Cut, v=Paste, {scroll_info}"
         else:
             status_line = "Delete=Remove, ↑↓=Navigate, Enter=Open, q=Quit, c=Copy, x=Cut, v=Paste"
         
