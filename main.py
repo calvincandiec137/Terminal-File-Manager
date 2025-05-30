@@ -34,7 +34,7 @@ def main(stdscr):
     
         directory_data = file.gather_directory_data(current_path, sort)
         headers = file.generate_headers(current_path, terminal_width)
-        rows = tabulate.tabulate(directory_data, headers=headers, tablefmt="grid", maxcolwidths=[None, 18]).splitlines()
+        rows = tabulate.tabulate(directory_data, headers=headers, tablefmt="rounded_outline", maxcolwidths=[None, 18]).splitlines()
         
         max_displayable_rows = terminal_height - 2  # 2 for keybinds
         total_rows = len(rows)

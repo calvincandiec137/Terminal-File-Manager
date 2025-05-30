@@ -11,7 +11,7 @@ def handle_key_input(key: int, cursor_row: int, directory: str, data: list, sort
     
     data_rows = []
     for i, row in enumerate(data):
-        data_rows.append(3 + (i * 2))
+        data_rows.append(3 + i)
     
     if key == curses.KEY_UP and cursor_row > 3:
 
@@ -152,5 +152,5 @@ def get_data_index_from_cursor(cursor_row: int, data: list) -> int:
     if cursor_row < 3:
         return -1
 
-    data_index = (cursor_row - 3) // 2
+    data_index = (cursor_row - 3)
     return data_index if data_index < len(data) else -1
