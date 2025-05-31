@@ -4,7 +4,10 @@ import os
 import tabulate
 import file_utils as file
 import input_handler as input
-import config
+import time
+
+COLOR_TABLE = 1
+COLOR_HIGHLIGHT = 2
 
 class WindowState:
     def __init__(self, win):
@@ -36,89 +39,53 @@ def render_window(panel, height, width):
         row = panel.rows[i][:width - 1]
         try:
             if i == panel.cursor_row and panel.focused:
-                panel.win.addstr(i - start_row, 0, row, curses.color_pair(config.COLOR_HIGHLIGHT) | curses.A_REVERSE)
+                panel.win.addstr(i - start_row, 0, row, curses.color_pair(COLOR_HIGHLIGHT) | curses.A_REVERSE)
             else:
-                panel.win.addstr(i - start_row, 0, row, curses.color_pair(config.COLOR_TABLE))
+                panel.win.addstr(i - start_row, 0, row, curses.color_pair(COLOR_TABLE))
         except curses.error:
             break
 
 def render_side_panel(subpanel, panel_type="tree", focused_panel=None):
     subpanel.clear()
     height, width = subpanel.getmaxyx()
-    
-    try:
-        # Draw border
-        for i in range(height):
-            if i == 0:
-                border_str = f"╭{'─' * (width - 2)}╮"
-                subpanel.addstr(i, 0, border_str[:width], curses.color_pair(config.COLOR_TABLE))
-            elif i == height - 1:
-                border_str = f"╰{'─' * (width - 2)}╯"
-                subpanel.addstr(i, 0, border_str[:width], curses.color_pair(config.COLOR_TABLE))
-            else:
-                subpanel.addstr(i, 0, "│", curses.color_pair(config.COLOR_TABLE))
-                if width > 1:
-                    subpanel.addstr(i, width - 1, "│", curses.color_pair(config.COLOR_TABLE))
-        
-        # Add title and content
-        if panel_type == "tree":
-            title = " Tree "
-            if width >= len(title):
-                title_x = (width - len(title)) // 2
-                subpanel.addstr(0, title_x, title, curses.color_pair(config.COLOR_TABLE))
-            
-            # Show current directory
-            if focused_panel and height > 3 and width > 4:
-                current_dir = os.path.basename(focused_panel.path) or "/"
-                display_dir = current_dir[:width - 4] if len(current_dir) > width - 4 else current_dir
-                subpanel.addstr(2, 2, display_dir, curses.color_pair(config.COLOR_TABLE))
-                
-                # Show parent directories if space allows
-                if height > 4:
-                    parent = os.path.dirname(focused_panel.path)
-                    if parent and parent != focused_panel.path:
-                        parent_name = os.path.basename(parent) or "/"
-                        display_parent = f"../{parent_name}"[:width - 4]
-                        subpanel.addstr(3, 2, display_parent, curses.color_pair(3))
-        
-        else:  # Properties panel
-            title = " Props "
-            if width >= len(title):
-                title_x = (width - len(title)) // 2
-                subpanel.addstr(0, title_x, title, curses.color_pair(config.COLOR_TABLE))
-            
-            # Show selected item properties
-            if focused_panel and focused_panel.data and height > 3 and width > 4:
-                data_index = focused_panel.cursor_row - 3
-                if 0 <= data_index < len(focused_panel.data):
-                    item = focused_panel.data[data_index]
-                    if item:
-                        line = 2
-                        # Item name
-                        name = str(item[0])[:width - 4]
-                        subpanel.addstr(line, 2, name, curses.color_pair(config.COLOR_TABLE))
-                        line += 1
-                        
-                        # Item size
-                        if len(item) > 1 and line < height - 1:
-                            size = str(item[1])[:width - 4]
-                            subpanel.addstr(line, 2, size, curses.color_pair(3))
-                            line += 1
-                        
-                        # Item date
-                        if len(item) > 2 and line < height - 1:
-                            date = str(item[2])[:width - 4]
-                            subpanel.addstr(line, 2, date, curses.color_pair(3))
-    
-    except curses.error:
+
+    for i in range(height):
+        if i == 0:
+            border_str = f"╭{'─' * (width - 3)}╮"
+            subpanel.addstr(i, 0, border_str[:width], curses.color_pair(COLOR_TABLE))
+        elif i == height - 1:
+            border_str = f"╰{'─' * (width - 3)}╯"
+            subpanel.addstr(i, 0, border_str[:width], curses.color_pair(COLOR_TABLE))
+        else:
+            subpanel.addstr(i, 0, "│", curses.color_pair(COLOR_TABLE))
+            if width > 1:
+                subpanel.addstr(i, width - 2, "│", curses.color_pair(COLOR_TABLE))
+    file_panel = focused_panel.data[focused_panel.cursor_row - 3][0].lstrip('/')
+    file_path = os.path.join(focused_panel.path, file_panel)
+    size = 0
+    try: 
+        file_stat = os.stat(file_path)
+        size = round(file_stat.st_size / (1024), 2)  if os.path.isfile(file_path    ) else  round(file.get_folder_size(file_path)/ (1024), 2)
+    except FileNotFoundError:
         pass
     
+    try:
+        if panel_type == "properties":
+            i=1
+            subpanel.addstr(i, 1, f'Name: {os.path.basename(file_path)}', curses.color_pair(COLOR_TABLE));
+            subpanel.addstr(i, 1, f'Path: {os.path.abspath(file_path)}', curses.color_pair(COLOR_TABLE)); i += 1
+            subpanel.addstr(i, 1, f'Size: {size} KB', curses.color_pair(COLOR_TABLE)); i += 1
+            subpanel.addstr(i, 1, f'Created: {time.ctime(file_stat.st_ctime)}', curses.color_pair(COLOR_TABLE)); i += 1
+            subpanel.addstr(i, 1, f'Modified: {time.ctime(file_stat.st_mtime)}', curses.color_pair(COLOR_TABLE)); i += 1
+            subpanel.addstr(i, 1, f'Permissions: {oct(file_stat.st_mode & 0o777)}', curses.color_pair(COLOR_TABLE)); i += 1
+    except UnboundLocalError:
+        pass
+
+                    
     subpanel.refresh()
 
 def calculate_layout(term_height, term_width):
-
-    # Minimum sizes 
-    MIN_PANEL_WIDTH = 20
+ 
     MIN_SIDE_PANEL_WIDTH = 15
     MIN_HEIGHT = 10
     
@@ -188,8 +155,8 @@ def create_win(stdscr, layout):
 
 def main(stdscr):
     curses.start_color()
-    curses.init_pair(config.COLOR_TABLE, curses.COLOR_GREEN, curses.COLOR_BLACK)
-    curses.init_pair(config.COLOR_HIGHLIGHT, curses.COLOR_WHITE, curses.COLOR_BLUE)
+    curses.init_pair(COLOR_TABLE, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(COLOR_HIGHLIGHT, curses.COLOR_WHITE, curses.COLOR_BLUE)
     curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
 
     curses.cbreak()
@@ -237,10 +204,8 @@ def main(stdscr):
         
         status_line = f"W:{term_width} H:{term_height} | Tab=Switch | ↑↓=Navigate | Enter=Open | q=Quit"
         status_text = status_line[:term_width - 1]
-        try:
-            stdscr.addstr(term_height - 1, 0, status_text, curses.color_pair(3))
-        except curses.error:
-            pass
+        
+        stdscr.addstr(term_height - 1, 0, status_text, curses.color_pair(3))
 
         stdscr.refresh()
         key = stdscr.getch()
