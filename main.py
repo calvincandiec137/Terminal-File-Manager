@@ -24,7 +24,7 @@ def render_window(panel, height, width):
         headers = file.generate_headers(panel.path, width)
         panel.rows = tabulate.tabulate(panel.data, headers=headers, tablefmt="rounded_outline", maxcolwidths=[None, 18]).splitlines()
 
-    max_displayable_rows = height - 2
+    max_displayable_rows = height - 1
     total_rows = len(panel.rows)
     max_scroll = max(0, total_rows - max_displayable_rows)
     panel.scroll_offset = max(0, min(panel.scroll_offset, max_scroll)) #when scroll tries to go beyond max scroll it seits min to max_scrool then we choose max max_scroll 
@@ -44,6 +44,21 @@ def render_window(panel, height, width):
             
 
 
+def render(subpanel, height, width):
+    subpanel.clear()
+    width = width - 3
+    #tree.addstr(1,65,"Test",curses.color_pair(config.COLOR_TABLE))
+    for i in range(height):
+        if i == 0:
+            subpanel.addstr(i, 0, f"╭{"─"*width}╮", curses.color_pair(config.COLOR_TABLE))
+        elif i == height - 1 :
+            subpanel.addstr(i, 0, f"╰{"─"*width}╯", curses.color_pair(config.COLOR_TABLE))
+        else :
+            subpanel.addstr(i, 0, "│", curses.color_pair(config.COLOR_TABLE))
+            subpanel.addstr(i, height + 48 , "│", curses.color_pair(config.COLOR_TABLE))
+    
+    subpanel.refresh()
+
 def main(stdscr):
     curses.start_color()
     curses.init_pair(config.COLOR_TABLE, curses.COLOR_GREEN, curses.COLOR_BLACK)
@@ -53,13 +68,25 @@ def main(stdscr):
     curses.cbreak()
     stdscr.keypad(True)
     curses.curs_set(0)
-
+    
     term_height, term_width = stdscr.getmaxyx()
-    mid = term_width // 2
-
-    left_win = stdscr.subwin(term_height, 55, 0, 0)
-    right_win = stdscr.subwin(term_height, term_width - mid, 0, 51)
-
+    
+    # Define layout ratios
+    left_width = term_width // 2         # 50%
+    right_width = term_width - left_width  # Remaining 50%
+    side_panel_width = term_width // 4     # 25%
+    
+    # Adjust right panel size accordingly
+    tree_height = term_height // 2
+    prop_height = term_height - tree_height
+    
+    # Define windows using computed sizes
+    left_win = stdscr.subwin(term_height, left_width, 0, 0)
+    right_win = stdscr.subwin(term_height, right_width - side_panel_width+10, 0, left_width - 35)
+    tree_win = stdscr.subwin(tree_height - 2, side_panel_width + 25 , 0, term_width - side_panel_width - 25)
+    properties = stdscr.subwin(prop_height + 3, side_panel_width + 25, tree_height - 3, term_width - side_panel_width - 25)
+    
+    
     left = WindowState(left_win)
     right = WindowState(right_win)
     left.focused = True
@@ -72,9 +99,11 @@ def main(stdscr):
         for panel in panels:
             render_window(panel, term_height, 55)
         
-        status_line = f"Delete=Remove, ↑↓=Navigate, Enter=Open, q=Quit, c=Copy, x=Cut, v=Paste"
+        render(tree_win,tree_height - 3 , side_panel_width +25)
+        render(properties, prop_height - 3, side_panel_width + 26)
+        status_line = f"{term_width}, ↑↓=Navigate, {term_height}, q=Quit, c=Copy, x=Cut, v=Paste"
         try:
-            stdscr.addstr(term_height - 1, 0, status_line[:55 - 1], curses.color_pair(3))
+            stdscr.addstr(term_height - 1, term_width - side_panel_width - 20, status_line[:55 - 1], curses.color_pair(3))
         except curses.error:
             pass
 
