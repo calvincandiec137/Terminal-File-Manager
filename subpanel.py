@@ -12,7 +12,7 @@ def git(subpanel, focused):
    subpanel.addstr(0, 2, "Git status", curses.color_pair(m.COLOR_TABLE))
    
    for i, line in enumerate(lines):
-       subpanel.addstr(i+1, 1, line[:40], curses.color_pair(m.COLOR_TABLE))
+       subpanel.addstr(i+1, 1, line, curses.color_pair(m.COLOR_TABLE))
    
    subpanel.refresh()
     
@@ -23,11 +23,11 @@ def text_lines(subpanel, focused):
     file_path = os.path.join(focused.path, file_panel)
     
     with open(file_path, 'r') as f:
-        for _, line in zip(range(15), f):
+        for _, line in zip(range(30), f):
             lines.append(line.rstrip('\n'))
 
-    for i in range(min(15, len(lines))):
-        subpanel.addstr(i+1, 1, lines[i][:40], curses.color_pair(m.COLOR_TABLE))
+    for i in range(min(25, len(lines))):
+        subpanel.addstr(i+1, 1, lines[i][:83], curses.color_pair(m.COLOR_TABLE))
     subpanel.addstr(0, 2, f"{os.path.basename(file_path)}", curses.color_pair(m.COLOR_TABLE))
     
     subpanel.refresh()

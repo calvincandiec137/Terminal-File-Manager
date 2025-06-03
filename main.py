@@ -110,12 +110,12 @@ def calculate_layout(term_height, term_width):
         left_width = main_width // 2
         right_width = main_width - left_width
     else:
-        side_panel_width = max(MIN_SIDE_PANEL_WIDTH, min(term_width*2 // 5, 50))
+        side_panel_width = max(MIN_SIDE_PANEL_WIDTH, min(term_width // 2, 100))
         main_width = term_width - side_panel_width
         left_width = main_width // 2
-        right_width = main_width - left_width
+        right_width = main_width - left_width   
     
-    tree_height = max(MIN_HEIGHT // 2, term_height // 2) - 2 # -2 cuz the right left panel are of not full lenght
+    tree_height = max(MIN_HEIGHT // 2, term_height * 3 // 4) - 2 # -2 cuz the right left panel are of not full lenght
     prop_height = term_height - tree_height - 6
     
     return {
