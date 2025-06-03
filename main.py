@@ -5,6 +5,7 @@ import tabulate
 import file_utils as file
 import input_handler as input
 import time
+import subpanel as sp
 
 COLOR_TABLE = 1
 COLOR_HIGHLIGHT = 2
@@ -60,6 +61,18 @@ def render_side_panel(subpanel, panel_type="tree", focused_panel=None):
             subpanel.addstr(i, 0, "│", curses.color_pair(COLOR_TABLE))
             if width > 1:
                 subpanel.addstr(i, width - 2, "│", curses.color_pair(COLOR_TABLE))
+                
+        if panel_type == "tree":
+            
+            type_of_element = focused_panel.data[focused_panel.cursor_row - 3][0].lstrip('/')
+            element_path = os.path.join(focused_panel.path, type_of_element)
+            if type_of_element == ".git":
+                sp.git(subpanel,focused_panel)
+            elif os.path.isfile(element_path):
+                sp.text_lines(subpanel, focused_panel)
+            else :
+                sp.dir_info(subpanel, focused_panel)
+    
     file_panel = focused_panel.data[focused_panel.cursor_row - 3][0].lstrip('/')
     file_path = os.path.join(focused_panel.path, file_panel)
     size = 0
