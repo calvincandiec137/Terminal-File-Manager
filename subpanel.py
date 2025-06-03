@@ -9,8 +9,10 @@ def git(subpanel, focused):
    result = subprocess.run(['git',  'status'], stdout=subprocess.PIPE, cwd = focused.path)
    lines = result.stdout.splitlines()
    
+   subpanel.addstr(0, 2, "Git status", curses.color_pair(m.COLOR_TABLE))
+   
    for i, line in enumerate(lines):
-       subpanel.addstr(i+1, 1, line[:45], curses.color_pair(m.COLOR_TABLE))
+       subpanel.addstr(i+1, 1, line[:40], curses.color_pair(m.COLOR_TABLE))
    
    subpanel.refresh()
     
@@ -26,6 +28,9 @@ def text_lines(subpanel, focused):
 
     for i in range(min(15, len(lines))):
         subpanel.addstr(i+1, 1, lines[i][:40], curses.color_pair(m.COLOR_TABLE))
+    subpanel.addstr(0, 2, f"{os.path.basename(file_path)}", curses.color_pair(m.COLOR_TABLE))
+    
+    subpanel.refresh()
 
 def dir_info(subpanel, focused):
     
@@ -42,7 +47,7 @@ def dir_info(subpanel, focused):
     except Exception:
         files_count = 0
         dirs_count = 0
-
+    subpanel.addstr(0, 2, "Directory Info", curses.color_pair(m.COLOR_TABLE))
     subpanel.addstr(1, 1, f"Name: {focused.path}",curses.color_pair( m.COLOR_TABLE))
     subpanel.addstr(2, 1, f"Size: {round(file.get_folder_size(focused.path)/1024, 2)} KB", curses.color_pair( m.COLOR_TABLE))
     subpanel.addstr(3, 1, f"Files: {files_count}", curses.color_pair(m.COLOR_TABLE))

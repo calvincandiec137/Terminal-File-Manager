@@ -85,6 +85,7 @@ def render_side_panel(subpanel, panel_type="tree", focused_panel=None):
     try:
         if panel_type == "properties":
             i=1
+            subpanel.addstr(0, 2, "File Info", curses.color_pair(COLOR_TABLE))
             subpanel.addstr(i, 1, f'Name: {os.path.basename(file_path)}', curses.color_pair(COLOR_TABLE));
             subpanel.addstr(i, 1, f'Path: {os.path.abspath(file_path)}', curses.color_pair(COLOR_TABLE)); i += 1
             subpanel.addstr(i, 1, f'Size: {size} KB', curses.color_pair(COLOR_TABLE)); i += 1
