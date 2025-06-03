@@ -22,9 +22,12 @@ def text_lines(subpanel, focused):
     file_panel = focused.data[focused.cursor_row - 3][0].lstrip('/')
     file_path = os.path.join(focused.path, file_panel)
     
-    with open(file_path, 'r') as f:
-        for _, line in zip(range(30), f):
-            lines.append(line.rstrip('\n'))
+    try:
+        with open(file_path, 'r') as f:
+            for _, line in zip(range(30), f):
+                lines.append(line.rstrip('\n'))
+    except UnicodeDecodeError:
+        pass
 
     for i in range(min(25, len(lines))):
         subpanel.addstr(i+1, 1, lines[i][:83], curses.color_pair(m.COLOR_TABLE))

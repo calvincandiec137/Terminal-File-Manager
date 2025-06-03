@@ -1,5 +1,5 @@
 import os
-import time
+import redis
 
 dir_cache={}
 
@@ -10,9 +10,12 @@ def format_size(size_in_bytes):
             return f"{size_in_bytes:.2f} {unit}"
         size_in_bytes /= 1024
 
+r = redis.Redis(host = "localhost", port = 6379, decode_responses=True)
+
 def get_folder_size(path):
-    if path in dir_cache:
-        return dir_cache[path]
+    
+    if r.get(path):
+        return int(r.get(path))
 
     total_size = 0
     try:
@@ -26,8 +29,8 @@ def get_folder_size(path):
                     total_size += get_folder_size(entry.path)
     except PermissionError:
         pass 
-    dir_cache[path]=total_size
-    return total_size
+    r.set(path, total_size)
+    return int(total_size) 
 
 
 def gather_directory_data(directory, sort, terminal_height):
