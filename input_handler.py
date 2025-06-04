@@ -116,15 +116,6 @@ def handle_key_input(key: int, cursor_row: int, directory: str, data: list, sort
                 clipboard['operation'] = None
         
         return cursor_row, directory, sort_def
-    
-    elif key == ord('s'):  # Sort by size
-        return cursor_row, directory, 's'
-   
-    elif key == ord('a'):  # Sort alphabetically
-        return cursor_row, directory, 'a'
-   
-    elif key == ord('m'):  # Sort by modification date
-        return cursor_row, directory, 'm'
    
     elif key == curses.KEY_LEFT:  # Go back
         return 3, os.path.dirname(directory), sort_def
