@@ -9,10 +9,11 @@ It supports browsing directories, viewing file properties, and basic file operat
 ## Features
 
 - Dual-panel layout for easy directory comparison  
-- Directory tree view and file property panels  
+- File property panels
+- Text file preview
+- Git status of a directory  
 - Keyboard navigation (arrow keys, Tab for switching panels)  
-- File operations: copy, cut, paste, delete  
-- Sort files by name, size, or modification date  
+- File operations: copy, cut, paste, delete   
 - Open files with default system application  
 - Dynamic layout adapts to terminal resizing  
 - Directory size caching using Redis for improved performance  
