@@ -119,7 +119,7 @@ This file manager uses Redis to cache directory sizes, improving performance by 
 
 ## Screenshots
 
-*(Add your screenshots here showing the dual-panel UI, navigation, and side panels)*
+![Terminal File Manager UI](Screenshots/UI.png)
 
 ---
 
