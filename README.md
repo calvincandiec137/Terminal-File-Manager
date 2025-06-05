@@ -6,7 +6,7 @@ It supports browsing directories, viewing file properties, and basic file operat
 
 ---
 
-![Screen Recording](Screenshots/Video.mp4)
+![Screen Recording](Screenshots/demo.gif)
 
 ---
 ## Features
