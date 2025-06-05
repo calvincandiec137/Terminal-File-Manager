@@ -6,6 +6,9 @@ It supports browsing directories, viewing file properties, and basic file operat
 
 ---
 
+![Screen Recording](Screenshots/Video.mp4)
+
+---
 ## Features
 
 - Dual-panel layout for easy directory comparison  

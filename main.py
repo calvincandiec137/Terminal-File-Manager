@@ -216,7 +216,7 @@ def main(stdscr):
         render_side_panel(tree_win, "tree", focused_panel)
         render_side_panel(properties_win, "properties", focused_panel)
         
-        status_line = f"W:{term_width} H:{term_height} | Tab=Switch | ↑↓=Navigate | Enter=Open | q=Quit"
+        status_line = f"c=Copy | v=Paste | x=Cut | Tab=Switch | ↑↓=Navigate | Enter=Open | q=Quit"
         status_text = status_line[:term_width - 1]
         
         stdscr.addstr(term_height - 1, 0, status_text, curses.color_pair(3))
